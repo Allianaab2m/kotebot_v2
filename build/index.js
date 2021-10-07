@@ -38,6 +38,7 @@ process.on('uncaughtException', function (err) {
 });
 const client = new discord_js_1.Client({
     intents: 32767,
+    partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 });
 client.once('ready', () => {
     console.log('Ready.');
@@ -250,6 +251,15 @@ client.on('messageReactionAdd', (reaction, user) => __awaiter(void 0, void 0, vo
     if (user.bot) {
         return;
     }
+    if (reaction.partial) {
+        try {
+            yield reaction.fetch();
+        }
+        catch (error) {
+            console.log(error);
+            return;
+        }
+    }
     const boshu_Embed = reaction.message.embeds[0];
     if (!boshu_Embed.footer) { // 募集メッセージじゃない場合
         return;
@@ -328,6 +338,15 @@ client.on('messageReactionRemove', (reaction, user) => __awaiter(void 0, void 0,
     const boshu_Embed = reaction.message.embeds[0];
     if (user.tag === ((_t = reaction.message.content) === null || _t === void 0 ? void 0 : _t.slice(0, -11))) { // 募集者が押した時，無視する
         return;
+    }
+    if (reaction.partial) {
+        try {
+            yield reaction.fetch();
+        }
+        catch (error) {
+            console.log(error);
+            return;
+        }
     }
     const reaction_member = yield ((_u = reaction.message.guild) === null || _u === void 0 ? void 0 : _u.members.fetch(`${user.id}`));
     if (reaction.emoji.name === emoji_arr[0]) { // ✋の場合
