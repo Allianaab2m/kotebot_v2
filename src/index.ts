@@ -12,6 +12,7 @@ process.on('uncaughtException', function(err) {
 
 const client = new Client({
     intents: 32767,
+    partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 })
 
 client.once('ready', () => {
@@ -233,6 +234,14 @@ client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessag
     if (user.bot) {
         return
     }
+    if (reaction.partial) {
+        try {
+            await reaction.fetch()
+        } catch (error) {
+            console.log(error)
+            return
+        }
+    }
 
     const boshu_Embed = reaction.message.embeds[0]
     if (!boshu_Embed.footer) { // 募集メッセージじゃない場合
@@ -310,6 +319,14 @@ client.on('messageReactionRemove', async (reaction: MessageReaction | PartialMes
     const boshu_Embed = reaction.message.embeds[0]
     if (user.tag === reaction.message.content?.slice(0, -11)) { // 募集者が押した時，無視する
         return
+    }
+    if (reaction.partial) {
+        try {
+            await reaction.fetch()
+        } catch (error) {
+            console.log(error)
+            return
+        }
     }
 
     const reaction_member: GuildMember | undefined = await reaction.message.guild?.members.fetch(`${user.id}`)
